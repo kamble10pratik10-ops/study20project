@@ -15,13 +15,17 @@ export default function Login() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:8000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      console.log("Attempting to login with:", { email, password });
+      const response = await fetch(
+        "https://9ca088bd88c0.ngrok-free.app/login/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
         },
-        body: JSON.stringify({ email, password }),
-      });
+      );
 
       console.log("response:", response);
 
@@ -39,8 +43,10 @@ export default function Login() {
         }
       }
 
+      console.log("response:", response);
+
       const data = await response.json();
-      console.log("Login successful:", data);
+      console.log("Login data:", data);
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("user", JSON.stringify(data.user));
       console.log("Token stored:", localStorage.getItem("token"));

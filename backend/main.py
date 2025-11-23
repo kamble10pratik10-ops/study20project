@@ -1,13 +1,33 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+
 from database import engine, Base, SessionLocal
 from config import get_settings
 from models import User
-from auth import get_password_hash  # keep only if needed for default user
+from auth import get_password_hash  # Only keep if needed for default user
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from datetime import timedelta
+from typing import Optional
+from database import get_db
+from models import User
+from schemas import UserCreate, UserLogin, TokenResponse, UserResponse
+from auth import get_password_hash, verify_password, create_access_token, decode_token
+from config import get_settings
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from sqlalchemy import desc
+from database import get_db
+from models import User, SearchHistory, Topic
+from schemas import DashboardResponse, SearchHistoryResponse, GroupResponse, TopicResponse
+from dependencies import get_current_user
+from api import auth, groups, search, dashboard, doubts
 
 settings = get_settings()
 
-# Create all tables
+# Create all tables (runs only once on startup)
 Base.metadata.create_all(bind=engine)
 
 
@@ -37,27 +57,49 @@ def create_default_user():
         db.close()
 
 
+# -------------------------------
+# 🚀 FIXED: Lifespan handler
+# -------------------------------
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("🚀 Application starting...")
+    create_default_user()  # Startup logic
+
+    yield
+
+    print("🛑 Application shutting down...")
+    # cleanup logic here (optional)
+
+
+# -------------------------------
+# 🚀 Correct FastAPI app instance
+# -------------------------------
 app = FastAPI(
     title="LearnConnect API",
     description="A collaborative learning platform API",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["POST", "GET"],
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
+app.include_router(groups.router)
+app.include_router(search.router)
+app.include_router(dashboard.router)
+app.include_router(doubts.router)
 
-@app.on_event("startup")
-def startup_event():
-    create_default_user()
 
-
+# -------------------------------
+# Routes
+# -------------------------------
 @app.get("/")
 def home():
     return {"status": "ok", "message": "LearnConnect API is running"}
@@ -68,10 +110,23 @@ def health():
     return {"status": "healthy"}
 
 
-from api.auth import router as auth_router
-app.include_router(auth_router)
+@app.get("/lif")
+def lif():
+    return {"status": "ok"}
 
 
+@app.get("/health")
+def health_check():
+    return {"status": "health"}
+
+
+# -------------------------------
+# 🚀 Development server
+# -------------------------------
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(
+        "main:app",  # IMPORTANT: import string (required for reload!)
+        host="0.0.0.0",
+        port=8000,
+        reload=True)

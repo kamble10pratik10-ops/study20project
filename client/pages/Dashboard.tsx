@@ -30,11 +30,15 @@ export default function Dashboard() {
 
     const fetchDashboard = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/dashboard", {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const response = await fetch(
+          "https://9ca088bd88c0.ngrok-free.app/dashboard",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch dashboard data");
