@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import timedelta
 from typing import Optional
-from ..database import get_db
-from ..models import User
-from ..schemas import UserCreate, UserLogin, TokenResponse, UserResponse
-from ..auth import get_password_hash, verify_password, create_access_token, decode_token
-from ..config import get_settings
+from database import get_db
+from models import User
+from schemas import UserCreate, UserLogin, TokenResponse, UserResponse
+from auth import get_password_hash, verify_password, create_access_token, decode_token
+from config import get_settings
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 settings = get_settings()
@@ -32,11 +32,9 @@ def signup(user_data: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
 
     access_token_expires = timedelta(
-        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-    )
-    access_token = create_access_token(
-        data={"sub": new_user.email}, expires_delta=access_token_expires
-    )
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(data={"sub": new_user.email},
+                                       expires_delta=access_token_expires)
 
     return {
         "access_token": access_token,
@@ -57,11 +55,9 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
         )
 
     access_token_expires = timedelta(
-        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-    )
-    access_token = create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
-    )
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(data={"sub": user.email},
+                                       expires_delta=access_token_expires)
 
     return {
         "access_token": access_token,
@@ -71,7 +67,8 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
 
 
 @router.get("/me", response_model=UserResponse)
-def get_current_user(token: Optional[str] = None, db: Session = Depends(get_db)):
+def get_current_user(token: Optional[str] = None,
+                     db: Session = Depends(get_db)):
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
