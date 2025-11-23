@@ -6,8 +6,16 @@ import { createServer } from "./server";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "0.0.0.0:",
+    host: "0.0.0.0",
     port: 5000,
+    allowedHosts: [
+      "1534e4c1-a23f-4c1b-b31e-e237be812a57-00-1urwepnccdrhg.pike.replit.dev",
+      "*",
+      "localhost",
+      "http://172.31.109.130:5000/",
+      "172.31.109.130",
+      "172.31.109.130:5000",
+    ],
     strictPort: true,
     hmr: {
       clientPort: 5000,

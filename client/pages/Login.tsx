@@ -23,6 +23,8 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
 
+      console.log("response:", response);
+
       if (!response.ok) {
         try {
           const data = await response.json();
@@ -38,9 +40,10 @@ export default function Login() {
       }
 
       const data = await response.json();
+      console.log("Login successful:", data);
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("user", JSON.stringify(data.user));
-
+      console.log("Token stored:", localStorage.getItem("token"));
       navigate("/dashboard");
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Login failed";
