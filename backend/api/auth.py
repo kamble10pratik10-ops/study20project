@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import timedelta
+from typing import Optional
 from database import get_db
 from models import User
 from schemas import UserCreate, UserLogin, TokenResponse, UserResponse
-from auth import get_password_hash, verify_password, create_access_token
+from auth import get_password_hash, verify_password, create_access_token, decode_token
 from config import get_settings
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -68,14 +69,12 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
 
 
 @router.get("/me", response_model=UserResponse)
-def get_current_user(token: str = None, db: Session = Depends(get_db)):
+def get_current_user(token: Optional[str] = None, db: Session = Depends(get_db)):
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
         )
-
-    from auth import decode_token
 
     payload = decode_token(token)
     if not payload:
