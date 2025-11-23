@@ -7,4 +7,28 @@ channel = "stable-25_05"
 
 [[ports]]
 localPort = 8000
-externalPort = 80
+externalPort = 8000
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Backend API"
+
+[[workflows.workflow]]
+name = "Backend API"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && python main.py"
+waitForPort = 8000
+
+[workflows.workflow.metadata]
+outputType = "console"

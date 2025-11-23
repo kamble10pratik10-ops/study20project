@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     BING_SEARCH_API_KEY: str = ""
 
     # CORS
-    CORS_ORIGINS: list = ["http://localhost:5173", "http://localhost:3000"]
+    CORS_ORIGINS: list = ["http://localhost:5173", "http://localhost:3000", "http://localhost:5000", "https://*.replit.dev", "https://*.repl.co"]
 
     class Config:
         env_file = ".env"

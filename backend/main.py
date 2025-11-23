@@ -62,6 +62,16 @@ app.add_middleware(
 )
 
 
+# Include routers
+from api import auth, groups, dashboard, doubts, search
+
+app.include_router(auth.router)
+app.include_router(groups.router)
+app.include_router(dashboard.router)
+app.include_router(doubts.router)
+app.include_router(search.router)
+
+
 @app.get("/")
 def health_check():
     return {"status": "ok"}
