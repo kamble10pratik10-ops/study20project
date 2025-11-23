@@ -6,12 +6,16 @@ expertMode = true
 channel = "stable-25_05"
 
 [[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
 localPort = 8000
 externalPort = 8000
 
 [[ports]]
-localPort = 5000
-externalPort = 80
+localPort = 33581
+externalPort = 3000
 
 [workflows]
 runButton = "Project"
