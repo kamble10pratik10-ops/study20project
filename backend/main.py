@@ -1,17 +1,19 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base, SessionLocal
 from config import get_settings
-from api import auth, groups, search, dashboard, doubts
 from models import User
-from auth import get_password_hash
+from auth import get_password_hash   # keep only if needed for default user
 
 settings = get_settings()
 
+# Create all tables
 Base.metadata.create_all(bind=engine)
 
+
 def create_default_user():
-    """Create a default user for testing if it doesn't exist"""
+    """Create a default test user if it doesn't exist"""
     db = SessionLocal()
     try:
         default_email = "abc@abc.com"
@@ -34,12 +36,23 @@ def create_default_user():
     finally:
         db.close()
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    create_default_user()
+    yield
+    # Shutdown (if needed)
+
+
 app = FastAPI(
     title="LearnConnect API",
     description="A collaborative learning platform API",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -48,24 +61,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router)
-app.include_router(groups.router)
-app.include_router(search.router)
-app.include_router(dashboard.router)
-app.include_router(doubts.router)
 
-
-@app.on_event("startup")
-def startup_event():
-    create_default_user()
-
-
-@app.get("/health")
+@app.get("/")
 def health_check():
     return {"status": "ok"}
 
 
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000)

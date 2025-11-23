@@ -1,0 +1,10 @@
+modules = ["nodejs-20", "python-3.12", "web", "bash"]
+[agent]
+expertMode = true
+
+[nix]
+channel = "stable-25_05"
+
+[[ports]]
+localPort = 8000
+externalPort = 80
