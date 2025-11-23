@@ -1,10 +1,9 @@
-from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base, SessionLocal
 from config import get_settings
 from models import User
-from auth import get_password_hash   # keep only if needed for default user
+from auth import get_password_hash  # keep only if needed for default user
 
 settings = get_settings()
 
@@ -17,7 +16,8 @@ def create_default_user():
     db = SessionLocal()
     try:
         default_email = "abc@abc.com"
-        existing_user = db.query(User).filter(User.email == default_email).first()
+        existing_user = db.query(User).filter(
+            User.email == default_email).first()
 
         if not existing_user:
             default_user = User(
@@ -37,45 +37,39 @@ def create_default_user():
         db.close()
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup
-    create_default_user()
-    yield
-    # Shutdown (if needed)
-
-
 app = FastAPI(
     title="LearnConnect API",
     description="A collaborative learning platform API",
     version="1.0.0",
-    lifespan=lifespan,
 )
 
 # CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
-    allow_origin_regex=r"https://.*\.(replit\.dev|repl\.co)",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-# Include routers
-from api import auth, groups, dashboard, doubts, search
-
-app.include_router(auth.router)
-app.include_router(groups.router)
-app.include_router(dashboard.router)
-app.include_router(doubts.router)
-app.include_router(search.router)
+@app.on_event("startup")
+def startup_event():
+    create_default_user()
 
 
 @app.get("/")
-def health_check():
-    return {"status": "ok"}
+def home():
+    return {"status": "ok", "message": "LearnConnect API is running"}
+
+
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
+
+
+from api.auth import router as auth_router
+app.include_router(auth_router)
 
 
 if __name__ == "__main__":
