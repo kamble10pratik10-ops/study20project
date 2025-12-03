@@ -24,7 +24,7 @@ Preferred communication style: Simple, everyday language.
 
 **Routing System:**
 - Routes are centrally defined in `client/App.tsx` using React Router's `BrowserRouter`
-- Page components live in `client/pages/` (Index, Login, Signup, Dashboard, Search, Groups, GroupDetail, Doubts, NotFound)
+- Page components live in `client/pages/` (Index, Login, Signup, Dashboard, Search, Groups, GroupDetail, Doubts, Profile, NotFound)
 - Layout wrapper provides consistent header/footer across authenticated and public routes
 - Authentication state managed via localStorage tokens
 
@@ -51,6 +51,7 @@ Preferred communication style: Simple, everyday language.
   - `groups.py` - CRUD operations for study groups
   - `doubts.py` - Question/answer system for community learning
   - `search.py` - YouTube and article search integration
+  - `posts.py` - User posts CRUD operations (create, read, delete)
 - Dependency injection pattern for database sessions and user authentication
 - CORS middleware configured for local development
 
@@ -61,6 +62,7 @@ Preferred communication style: Simple, everyday language.
 - Doubts table for community questions linked to topics
 - SearchHistory table tracking user search queries
 - GroupResources table for sharing learning materials within groups
+- Posts table for user-created content linked to users
 - Association tables (`group_members`, `user_interests`) for many-to-many relationships
 
 **Authentication Flow:**
