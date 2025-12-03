@@ -132,3 +132,30 @@ class DashboardResponse(BaseModel):
 class SearchResultsResponse(BaseModel):
     videos: List[dict]
     articles: List[dict]
+
+
+class PostBase(BaseModel):
+    title: str
+    content: str
+
+
+class PostCreate(PostBase):
+    pass
+
+
+class PostResponse(PostBase):
+    id: int
+    user_id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class PostDetailResponse(PostResponse):
+    author: UserResponse
+
+
+class UserProfileResponse(UserResponse):
+    posts: List[PostResponse] = []

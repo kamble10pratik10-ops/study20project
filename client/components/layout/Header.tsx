@@ -13,8 +13,20 @@ export function Header({ isDark, onThemeToggle }: HeaderProps) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      setIsLoggedIn(!!token);
+    };
+
+    checkAuth();
+
+    window.addEventListener("storage", checkAuth);
+    window.addEventListener("authChange", checkAuth);
+
+    return () => {
+      window.removeEventListener("storage", checkAuth);
+      window.removeEventListener("authChange", checkAuth);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -70,6 +82,12 @@ export function Header({ isDark, onThemeToggle }: HeaderProps) {
                 className="text-sm font-medium transition-colors hover:text-primary"
               >
                 Projects
+              </Link>
+              <Link
+                to="/profile"
+                className="text-sm font-medium transition-colors hover:text-primary"
+              >
+                Profile
               </Link>
             </>
           )}
@@ -139,6 +157,13 @@ export function Header({ isDark, onThemeToggle }: HeaderProps) {
                   onClick={() => setIsOpen(false)}
                 >
                   Projects
+                </Link>
+                <Link
+                  to="/profile"
+                  className="text-sm font-medium transition-colors hover:text-primary"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Profile
                 </Link>
               </div>
             )}

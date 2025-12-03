@@ -43,6 +43,7 @@ class User(Base):
     )
     doubts = relationship("Doubt", back_populates="created_by_user")
     search_history = relationship("SearchHistory", back_populates="user")
+    posts = relationship("Post", back_populates="author")
 
 
 class Topic(Base):
@@ -116,3 +117,16 @@ class SearchHistory(Base):
     searched_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="search_history")
+
+
+class Post(Base):
+    __tablename__ = "posts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title = Column(String(255), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    author = relationship("User", back_populates="posts")

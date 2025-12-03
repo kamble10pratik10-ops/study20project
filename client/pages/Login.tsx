@@ -43,6 +43,7 @@ export default function Login() {
       const data = await response.json();
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("user", JSON.stringify(data.user));
+      window.dispatchEvent(new Event("authChange"));
 
       navigate("/dashboard");
     } catch (err) {

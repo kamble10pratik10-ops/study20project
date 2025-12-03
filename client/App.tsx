@@ -18,6 +18,7 @@ import Groups from "./pages/Groups";
 import GroupDetail from "./pages/GroupDetail";
 import Doubts from "./pages/Doubts";
 import Projects from "./pages/Projects";
+import Profile from "./pages/Profile";
 
 
 const queryClient = new QueryClient();
@@ -121,6 +122,17 @@ const AppContent = () => {
                   onThemeToggle={() => setIsDark(!isDark)}
                 >
                   <Projects />
+                </Layout>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <Layout
+                  isDark={isDark}
+                  onThemeToggle={() => setIsDark(!isDark)}
+                >
+                  <Profile />
                 </Layout>
               }
             />
