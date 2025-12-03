@@ -26,6 +26,10 @@ interface GroupData {
   resources: GroupResource[];
 }
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+console.log(BASE_URL);
+
+
 export default function GroupDetail() {
   const { id } = useParams<{ id: string }>();
   const [group, setGroup] = useState<GroupData | null>(null);
@@ -48,7 +52,8 @@ export default function GroupDetail() {
 
     const fetchGroup = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/groups/${id}`, {
+        const response = await fetch(`${BASE_URL}/api/groups/${id}`, {
+          method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -72,8 +77,7 @@ export default function GroupDetail() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch(
-        `http://localhost:8000/api/groups/${id}/resources`,
+      const response = await fetch(`${BASE_URL}/api/groups/${id}/resources`,
         {
           method: "POST",
           headers: {
@@ -97,8 +101,7 @@ export default function GroupDetail() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch(
-        `http://localhost:8000/api/groups/${id}/leave`,
+      const response = await fetch(`${BASE_URL}/api/groups/${id}/leave`,
         {
           method: "POST",
           headers: {

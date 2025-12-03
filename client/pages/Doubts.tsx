@@ -16,6 +16,9 @@ interface Doubt {
   };
 }
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+console.log(BASE_URL);
+
 export default function Doubts() {
   const [doubts, setDoubts] = useState<Doubt[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,45 +32,50 @@ export default function Doubts() {
   });
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
-    const fetchDoubts = async () => {
-      try {
-        const url = filterTopic
-          ? `http://localhost:8000/api/doubts?topic=${filterTopic}`
-          : "http://localhost:8000/api/doubts";
-
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) throw new Error("Failed to fetch doubts");
-        const data = await response.json();
-        setDoubts(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load doubts");
-      } finally {
-        setLoading(false);
+  const fetchDoubts = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
       }
-    };
+      console.log(filterTopic);
+      const url = `${BASE_URL}/api/doubts`;
 
-    setLoading(true);
+      console.log(url);
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          topic: filterTopic,
+        }),
+      });
+
+      console.log(response);
+
+      if (!response.ok) throw new Error("Failed to fetch doubts");
+      const data = await response.json();
+      setDoubts(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load doubts");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchDoubts();
   }, [navigate, filterTopic]);
 
   const handleCreateDoubt = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-
+    console.log(token);
     try {
-      const response = await fetch("http://localhost:8000/api/doubts", {
+      const response = await fetch(`${BASE_URL}/api/doubts/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -78,10 +86,11 @@ export default function Doubts() {
 
       if (!response.ok) throw new Error("Failed to create doubt");
 
-      const newDoubt = await response.json();
-      setDoubts([newDoubt, ...doubts]);
+      // const newDoubt = await response.json();
+      // setDoubts([newDoubt, ...doubts]);
       setFormData({ topic: "", title: "", description: "" });
       setShowCreateForm(false);
+      fetchDoubts(); // Refresh the doubts list
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create doubt");
     }
@@ -91,15 +100,12 @@ export default function Doubts() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch(
-        `http://localhost:8000/api/doubts/${doubtId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await fetch(`${BASE_URL}/api/doubts/delete/${doubtId}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       if (!response.ok) throw new Error("Failed to delete doubt");
       setDoubts(doubts.filter((d) => d.id !== doubtId));
@@ -168,6 +174,7 @@ export default function Doubts() {
                     setFormData({ ...formData, title: e.target.value })
                   }
                   placeholder="What's your question?"
+
                   className="w-full px-4 py-2 rounded-lg border border-input bg-background placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   required
                 />

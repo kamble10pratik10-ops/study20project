@@ -8,11 +8,11 @@ from dependencies import get_current_user
 router = APIRouter(prefix="/api/groups", tags=["groups"])
 
 
-@router.post("", response_model=GroupResponse)
+@router.post("/create", response_model=GroupResponse)
 def create_group(
-    group_data: GroupCreate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+        group_data: GroupCreate,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db),
 ):
     topic = db.query(Topic).filter(Topic.id == group_data.topic_id).first()
     if not topic:
@@ -56,9 +56,9 @@ def get_group(group_id: int, db: Session = Depends(get_db)):
 
 @router.post("/{group_id}/join")
 def join_group(
-    group_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+        group_id: int,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db),
 ):
     group = db.query(Group).filter(Group.id == group_id).first()
     if not group:
@@ -82,9 +82,9 @@ def join_group(
 
 @router.post("/{group_id}/leave")
 def leave_group(
-    group_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+        group_id: int,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db),
 ):
     group = db.query(Group).filter(Group.id == group_id).first()
     if not group:
@@ -108,10 +108,10 @@ def leave_group(
 
 @router.post("/{group_id}/resources", response_model=dict)
 def add_resource(
-    group_id: int,
-    resource_data: GroupResourceCreate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+        group_id: int,
+        resource_data: GroupResourceCreate,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db),
 ):
     group = db.query(Group).filter(Group.id == group_id).first()
     if not group:

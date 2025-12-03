@@ -1,3 +1,4 @@
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -24,6 +25,8 @@ from models import User, SearchHistory, Topic
 from schemas import DashboardResponse, SearchHistoryResponse, GroupResponse, TopicResponse
 from dependencies import get_current_user
 from api import auth, groups, search, dashboard, doubts
+
+logging.basicConfig(level=logging.INFO)
 
 settings = get_settings()
 
@@ -100,14 +103,14 @@ app.include_router(doubts.router)
 # -------------------------------
 # Routes
 # -------------------------------
-@app.get("/")
+@app.get("/home")
 def home():
-    return {"status": "ok", "message": "LearnConnect API is running"}
+    return {"status": "ok"}
 
 
-@app.get("/health")
-def health():
-    return {"status": "healthy"}
+@app.get("/")
+def dev():
+    return {"status": "ok"}
 
 
 @app.get("/lif")

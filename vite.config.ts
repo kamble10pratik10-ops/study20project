@@ -6,11 +6,23 @@ import { createServer } from "./server";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
+    proxy: {
+      "/api": {
+        target: "https://9c3a908d097f.ngrok-free.app",
+        changeOrigin: true,
+        secure: false, // 👈 ignore cert issues
+      },
+    },
+    watch: {
+      usePolling: true,
+    },
     host: "0.0.0.0",
     port: 5000,
     allowedHosts: [
+      "c94fd538-4553-4c81-9e4a-ee591eadfebc-00-3tm0zpl8m3mzx.spock.repl.co",
       "1534e4c1-a23f-4c1b-b31e-e237be812a57-00-1urwepnccdrhg.pike.replit.dev",
       "*",
+      "c94fd538-4553-4c81-9e4a-ee591eadfebc-00-3tm0zpl8m3mzx.spock.replit.dev",
       "localhost",
       "http://172.31.109.130:5000/",
       "172.31.109.130",

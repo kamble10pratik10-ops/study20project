@@ -21,6 +21,8 @@ interface SearchResults {
   videos: Video[];
   articles: Article[];
 }
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+console.log(BASE_URL);
 
 export default function Search() {
   const [query, setQuery] = useState("");
@@ -46,9 +48,11 @@ export default function Search() {
 
     try {
       const token = localStorage.getItem("token");
+      console.log(query);
       const response = await fetch(
-        `http://localhost:8000/api/search/${encodeURIComponent(query)}`,
+        `${BASE_URL}/api/search/${encodeURIComponent(query)}`,
         {
+          method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
           },

@@ -13,6 +13,9 @@ interface DashboardData {
   recommended_topics: Array<{ id: number; name: string; description: string }>;
 }
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+console.log(BASE_URL);
+
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null,
@@ -30,15 +33,12 @@ export default function Dashboard() {
 
     const fetchDashboard = async () => {
       try {
-        const response = await fetch(
-          "https://9ca088bd88c0.ngrok-free.app/dashboard",
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+        const response = await fetch(`${BASE_URL}/api/dashboard/dash`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        );
+        });
 
         if (!response.ok) {
           throw new Error("Failed to fetch dashboard data");

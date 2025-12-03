@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, Loader } from "lucide-react";
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+console.log(BASE_URL);
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,19 +18,13 @@ export default function Login() {
     setError("");
 
     try {
-      console.log("Attempting to login with:", { email, password });
-      const response = await fetch(
-        "https://9ca088bd88c0.ngrok-free.app/login/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
+      const response = await fetch(`${BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
-
-      console.log("response:", response);
+        body: JSON.stringify({ email, password }),
+      });
 
       if (!response.ok) {
         try {
@@ -43,13 +40,10 @@ export default function Login() {
         }
       }
 
-      console.log("response:", response);
-
       const data = await response.json();
-      console.log("Login data:", data);
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      console.log("Token stored:", localStorage.getItem("token"));
+
       navigate("/dashboard");
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Login failed";

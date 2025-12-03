@@ -29,6 +29,9 @@ export default function Groups() {
   });
   const navigate = useNavigate();
 
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
+  console.log(BASE_URL);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -38,7 +41,8 @@ export default function Groups() {
 
     const fetchGroups = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/groups", {
+        const response = await fetch(`${BASE_URL}/api/groups`, {
+          method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -60,9 +64,9 @@ export default function Groups() {
   const handleCreateGroup = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-
+    console.log(token);
     try {
-      const response = await fetch("http://localhost:8000/api/groups", {
+      const response = await fetch(`${BASE_URL}/api/groups/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -75,9 +79,12 @@ export default function Groups() {
         }),
       });
 
+      console.log(response);
+
       if (!response.ok) throw new Error("Failed to create group");
 
       const newGroup = await response.json();
+      console.log(newGroup);
       setGroups([...groups, newGroup]);
       setFormData({ title: "", description: "", topic_id: "" });
       setShowCreateForm(false);
@@ -90,15 +97,12 @@ export default function Groups() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch(
-        `http://localhost:8000/api/groups/${groupId}/join`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await fetch(`${BASE_URL}/api/groups/${groupId}/join`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       if (!response.ok) throw new Error("Failed to join group");
 

@@ -17,6 +17,8 @@ import Search from "./pages/Search";
 import Groups from "./pages/Groups";
 import GroupDetail from "./pages/GroupDetail";
 import Doubts from "./pages/Doubts";
+import Projects from "./pages/Projects";
+
 
 const queryClient = new QueryClient();
 
@@ -108,6 +110,17 @@ const AppContent = () => {
                   onThemeToggle={() => setIsDark(!isDark)}
                 >
                   <Doubts />
+                </Layout>
+              }
+            />
+            <Route
+              path="/projects"
+              element={
+                <Layout
+                  isDark={isDark}
+                  onThemeToggle={() => setIsDark(!isDark)}
+                >
+                  <Projects />
                 </Layout>
               }
             />

@@ -65,6 +65,12 @@ export function Header({ isDark, onThemeToggle }: HeaderProps) {
               >
                 Doubts
               </Link>
+              <Link
+                to="/projects"
+                className="text-sm font-medium transition-colors hover:text-primary"
+              >
+                Projects
+              </Link>
             </>
           )}
         </div>
@@ -126,6 +132,13 @@ export function Header({ isDark, onThemeToggle }: HeaderProps) {
                   onClick={() => setIsOpen(false)}
                 >
                   Doubts
+                </Link>
+                <Link
+                  to="/projects"
+                  className="text-sm font-medium transition-colors hover:text-primary"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Projects
                 </Link>
               </div>
             )}
