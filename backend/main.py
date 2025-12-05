@@ -1,6 +1,9 @@
+import os
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 
 from database import engine, Base, SessionLocal
@@ -99,6 +102,16 @@ app.include_router(search.router)
 app.include_router(dashboard.router)
 app.include_router(doubts.router)
 app.include_router(posts.router)
+
+UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+@app.get("/api/uploads/{filename}")
+async def serve_upload(filename: str):
+    file_path = os.path.join(UPLOAD_DIR, filename)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(file_path)
 
 
 # -------------------------------

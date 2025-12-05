@@ -8,7 +8,8 @@ export default defineConfig(({ mode }) => ({
   server: {
     proxy: {
       "/api": {
-        target: "https://9c3a908d097f.ngrok-free.app",
+        target:
+          "0afc14b4-a602-41fd-b6d9-5093e1392d11-00-2ergle1nzcrwb.pike.replit.dev:8000",
         changeOrigin: true,
         secure: false, // 👈 ignore cert issues
       },
@@ -27,6 +28,7 @@ export default defineConfig(({ mode }) => ({
       "http://172.31.109.130:5000/",
       "172.31.109.130",
       "172.31.109.130:5000",
+      "0afc14b4-a602-41fd-b6d9-5093e1392d11-00-2ergle1nzcrwb.pike.replit.dev",
     ],
     strictPort: true,
     hmr: {

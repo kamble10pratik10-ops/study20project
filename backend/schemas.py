@@ -134,6 +134,20 @@ class SearchResultsResponse(BaseModel):
     articles: List[dict]
 
 
+class PostMediaResponse(BaseModel):
+    id: int
+    filename: str
+    original_filename: str
+    file_path: str
+    media_type: str
+    mime_type: str
+    file_size: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
 class PostBase(BaseModel):
     title: str
     content: str
@@ -148,6 +162,7 @@ class PostResponse(PostBase):
     user_id: int
     created_at: datetime
     updated_at: datetime
+    media: List[PostMediaResponse] = []
 
     class Config:
         from_attributes = True
