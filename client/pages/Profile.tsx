@@ -140,9 +140,7 @@ export default function Profile() {
       else if (file.type === "application/pdf") type = "pdf";
 
       const preview =
-        type === "image" || type === "video"
-          ? URL.createObjectURL(file)
-          : "";
+        type === "image" || type === "video" ? URL.createObjectURL(file) : "";
 
       newFiles.push({ file, preview, type });
     }
@@ -177,7 +175,7 @@ export default function Profile() {
         formData.append("files", filePreview.file);
       });
 
-      const response = await fetch(`${BASE_URL}/api/posts`, {
+      const response = await fetch(`${BASE_URL}/api/posts/create_post`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -264,7 +262,7 @@ export default function Profile() {
   };
 
   const renderMedia = (media: PostMedia) => {
-    const mediaUrl = `${BASE_URL}${media.file_path}`;
+    const mediaUrl = `${media.file_path}`;
 
     switch (media.media_type) {
       case "image":

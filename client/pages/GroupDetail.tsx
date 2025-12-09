@@ -29,7 +29,6 @@ interface GroupData {
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 console.log(BASE_URL);
 
-
 export default function GroupDetail() {
   const { id } = useParams<{ id: string }>();
   const [group, setGroup] = useState<GroupData | null>(null);
@@ -53,7 +52,7 @@ export default function GroupDetail() {
     const fetchGroup = async () => {
       try {
         const response = await fetch(`${BASE_URL}/api/groups/${id}`, {
-          method: "POST",
+          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -77,16 +76,14 @@ export default function GroupDetail() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch(`${BASE_URL}/api/groups/${id}/resources`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(shareData),
+      const response = await fetch(`${BASE_URL}/api/groups/${id}/resources`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      );
+        body: JSON.stringify(shareData),
+      });
 
       if (!response.ok) throw new Error("Failed to share resource");
 
@@ -101,14 +98,12 @@ export default function GroupDetail() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch(`${BASE_URL}/api/groups/${id}/leave`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await fetch(`${BASE_URL}/api/groups/${id}/leave`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       if (!response.ok) throw new Error("Failed to leave group");
       navigate("/groups");

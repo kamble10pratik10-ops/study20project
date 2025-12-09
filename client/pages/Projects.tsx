@@ -44,8 +44,8 @@ export default function Projects() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/api/projects`, {
-          method: "POST",
+        const response = await fetch(`${BASE_URL}/api/projects/list`, {
+          method: "GET",
         });
 
         if (!response.ok) throw new Error("Failed to fetch projects");

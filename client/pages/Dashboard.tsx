@@ -34,7 +34,7 @@ export default function Dashboard() {
     const fetchDashboard = async () => {
       try {
         const response = await fetch(`${BASE_URL}/api/dashboard/dash`, {
-          method: "POST",
+          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
           },

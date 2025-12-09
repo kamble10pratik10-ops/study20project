@@ -52,7 +52,7 @@ export default function Search() {
       const response = await fetch(
         `${BASE_URL}/api/search/${encodeURIComponent(query)}`,
         {
-          method: "POST",
+          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
           },

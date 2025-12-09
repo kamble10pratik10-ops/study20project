@@ -42,7 +42,7 @@ export default function Groups() {
     const fetchGroups = async () => {
       try {
         const response = await fetch(`${BASE_URL}/api/groups`, {
-          method: "POST",
+          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
           },
