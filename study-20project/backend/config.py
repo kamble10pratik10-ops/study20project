@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     YOUTUBE_API_KEY: str = ""
     BING_SEARCH_API_KEY: str = ""
     
+    
     # Cloudinary
     CLOUDINARY_CLOUD_NAME: str = "dsy0u40lh"
     CLOUDINARY_API_KEY: str = "993628589566454"
