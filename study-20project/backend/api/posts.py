@@ -156,46 +156,6 @@ async def add_media_to_post(
 
     return PostMediaResponse.model_validate(post_media)
 
-
-
-    media = db.query(PostMedia).filter(PostMedia.id == media_id).first()
-    if not media:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Media not found",
-        )
-    
-    post = db.query(Post).filter(Post.id == media.post_id).first()
-    if not post or post.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Can only delete media from your own posts",
-        )
-
-    # Delete from Cloudinary using public_id (stored in filename field)
-    # If filename is a URL, extract public_id from it
-    public_id = media.filename
-    if public_id.startswith('http'):
-        public_id = extract_public_id_from_url(public_id)
-    
-    # Determine resource type based on media_type
-    resource_type_map = {
-        'image': 'image',
-        'video': 'video',
-        'pdf': 'raw',
-        'audio': 'video'  # Cloudinary treats audio as video
-    }
-    resource_type = resource_type_map.get(media.media_type, 'auto')
-    
-    delete_file_from_cloudinary(public_id, resource_type=resource_type)
-
-    db.delete(media)
-    db.commit()
-
-    return {"message": "Media deleted successfully"}
-
-
-
 @router.get("/my", response_model=list[PostResponse])
 def get_my_posts(
     current_user: User = Depends(get_current_user),
