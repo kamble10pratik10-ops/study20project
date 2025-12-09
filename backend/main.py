@@ -19,6 +19,8 @@ from models import User
 from schemas import UserCreate, UserLogin, TokenResponse, UserResponse
 from auth import get_password_hash, verify_password, create_access_token, decode_token
 from config import get_settings
+from api.project import router as project_router
+
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -28,6 +30,7 @@ from models import User, SearchHistory, Topic
 from schemas import DashboardResponse, SearchHistoryResponse, GroupResponse, TopicResponse
 from dependencies import get_current_user
 from api import auth, groups, search, dashboard, doubts, posts
+from fastapi.responses import JSONResponse
 
 logging.basicConfig(level=logging.INFO)
 
@@ -102,6 +105,8 @@ app.include_router(search.router)
 app.include_router(dashboard.router)
 app.include_router(doubts.router)
 app.include_router(posts.router)
+app.include_router(project_router)
+
 
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -136,6 +141,13 @@ def lif():
 def health_check():
     return {"status": "health"}
 
+@app.options("/{full_path:path}")
+async def preflight_handler(full_path: str):
+    response = JSONResponse({"status": "ok"})
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
 
 # -------------------------------
 # 🚀 Development server

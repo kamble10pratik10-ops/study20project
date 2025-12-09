@@ -7,6 +7,11 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "sqlite:///./learnconnect.db"
 
+     # Add missing fields:
+    VITE_PUBLIC_BUILDER_KEY: str | None = None
+    PING_MESSAGE: str | None = None
+    VITE_BASE_URL: str | None = None
+
     # JWT
     SECRET_KEY: str = "your-secret-key-change-in-production"
     ALGORITHM: str = "HS256"
@@ -15,6 +20,12 @@ class Settings(BaseSettings):
     # API Keys
     YOUTUBE_API_KEY: str = ""
     BING_SEARCH_API_KEY: str = ""
+    
+    
+    # Cloudinary
+    CLOUDINARY_CLOUD_NAME: str = "dsy0u40lh"
+    CLOUDINARY_API_KEY: str = "993628589566454"
+    CLOUDINARY_API_SECRET: str = "uqOyjfE3FLHmMLaoj9i9LTGfBq4"
 
     # CORS
     CORS_ORIGINS: list = ["http://localhost:5173", "http://localhost:3000", "http://localhost:5000", "*"]

@@ -15,11 +15,11 @@ def create_group(
         db: Session = Depends(get_db),
 ):
     topic = db.query(Topic).filter(Topic.id == group_data.topic_id).first()
-    if not topic:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Topic not found",
-        )
+    # if not topic:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_404_NOT_FOUND,
+    #         detail="Topic not found",
+    #     )
 
     new_group = Group(
         title=group_data.title,

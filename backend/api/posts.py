@@ -1,7 +1,4 @@
-import os
-import uuid
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
-from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from typing import List, Optional
@@ -10,11 +7,9 @@ from database import get_db
 from models import User, Post, PostMedia
 from schemas import PostCreate, PostResponse, PostDetailResponse, PostMediaResponse
 from dependencies import get_current_user
+from cloudinary_utils import upload_file_to_cloudinary, delete_file_from_cloudinary, extract_public_id_from_url
 
 router = APIRouter(prefix="/api/posts", tags=["posts"])
-
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 ALLOWED_EXTENSIONS = {
     'image': ['jpg', 'jpeg', 'png', 'gif', 'webp'],
@@ -55,14 +50,7 @@ def get_media_type(content_type: str, filename: str) -> Optional[str]:
     return None
 
 
-async def get_file_size(file: UploadFile) -> int:
-    file.file.seek(0, 2)
-    size = file.file.tell()
-    file.file.seek(0)
-    return size
-
-
-@router.post("", response_model=PostResponse)
+@router.post("/create_post", response_model=PostResponse)
 async def create_post(
     title: str = Form(...),
     content: str = Form(...),
@@ -81,38 +69,31 @@ async def create_post(
     db.refresh(new_post)
 
     for file in files:
-        if not file.filename:
-            continue
+        if file.filename and file.size > 0:
+            media_type = get_media_type(file.content_type or '', file.filename)
+            if not media_type:
+                continue
             
-        file_size = await get_file_size(file)
-        if file_size == 0:
-            continue
+            if file.size > MAX_FILE_SIZE:
+                continue
+
+            # Upload to Cloudinary
+            upload_result = await upload_file_to_cloudinary(file, folder="posts")
             
-        media_type = get_media_type(file.content_type or '', file.filename)
-        if not media_type:
-            continue
-        
-        if file_size > MAX_FILE_SIZE:
-            continue
-
-        ext = file.filename.split('.')[-1] if '.' in file.filename else ''
-        unique_filename = f"{uuid.uuid4().hex}.{ext}"
-        file_path = os.path.join(UPLOAD_DIR, unique_filename)
-
-        file_content = await file.read()
-        with open(file_path, "wb") as buffer:
-            buffer.write(file_content)
-
-        post_media = PostMedia(
-            post_id=new_post.id,
-            filename=unique_filename,
-            original_filename=file.filename,
-            file_path=f"/api/uploads/{unique_filename}",
-            media_type=media_type,
-            mime_type=file.content_type or 'application/octet-stream',
-            file_size=file_size,
-        )
-        db.add(post_media)
+            # Store Cloudinary URL and public_id
+            cloudinary_url = upload_result.get('secure_url', upload_result.get('url'))
+            public_id = upload_result.get('public_id', '')
+            
+            post_media = PostMedia(
+                post_id=new_post.id,
+                filename=public_id,  # Store public_id as filename for deletion
+                original_filename=file.filename,
+                file_path=cloudinary_url,  # Store Cloudinary URL
+                media_type=media_type,
+                mime_type=file.content_type or 'application/octet-stream',
+                file_size=file.size,
+            )
+            db.add(post_media)
 
     db.commit()
     db.refresh(new_post)
@@ -147,72 +128,33 @@ async def add_media_to_post(
             detail="File type not allowed. Allowed types: images, audio, video, PDF",
         )
     
-    file_size = await get_file_size(file)
-    if file_size > MAX_FILE_SIZE:
+    if file.size and file.size > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"File too large. Maximum size is {MAX_FILE_SIZE // (1024*1024)}MB",
         )
 
-    ext = file.filename.split('.')[-1] if file.filename and '.' in file.filename else ''
-    unique_filename = f"{uuid.uuid4().hex}.{ext}"
-    file_path = os.path.join(UPLOAD_DIR, unique_filename)
-
-    file_content = await file.read()
-    with open(file_path, "wb") as buffer:
-        buffer.write(file_content)
+    # Upload to Cloudinary
+    upload_result = await upload_file_to_cloudinary(file, folder="posts")
+    
+    # Store Cloudinary URL and public_id
+    cloudinary_url = upload_result.get('secure_url', upload_result.get('url'))
+    public_id = upload_result.get('public_id', '')
 
     post_media = PostMedia(
         post_id=post_id,
-        filename=unique_filename,
+        filename=public_id,  # Store public_id as filename for deletion
         original_filename=file.filename or 'unknown',
-        file_path=f"/api/uploads/{unique_filename}",
+        file_path=cloudinary_url,  # Store Cloudinary URL
         media_type=media_type,
         mime_type=file.content_type or 'application/octet-stream',
-        file_size=file_size,
+        file_size=file.size or 0,
     )
     db.add(post_media)
     db.commit()
     db.refresh(post_media)
 
     return PostMediaResponse.model_validate(post_media)
-
-
-@router.delete("/media/{media_id}")
-def delete_media(
-    media_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    media = db.query(PostMedia).filter(PostMedia.id == media_id).first()
-    if not media:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Media not found",
-        )
-    
-    post = db.query(Post).filter(Post.id == media.post_id).first()
-    if not post or post.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Can only delete media from your own posts",
-        )
-
-    file_path = os.path.join(UPLOAD_DIR, media.filename)
-    if os.path.exists(file_path):
-        os.remove(file_path)
-
-    db.delete(media)
-    db.commit()
-
-    return {"message": "Media deleted successfully"}
-
-
-@router.get("", response_model=list[PostDetailResponse])
-def list_posts(db: Session = Depends(get_db)):
-    posts = db.query(Post).order_by(desc(Post.created_at)).all()
-    return [PostDetailResponse.model_validate(post) for post in posts]
-
 
 @router.get("/my", response_model=list[PostResponse])
 def get_my_posts(
@@ -274,10 +216,24 @@ def delete_post(
             detail="Can only delete your own posts",
         )
 
+    # Delete all media from Cloudinary
     for media in post.media:
-        file_path = os.path.join(UPLOAD_DIR, media.filename)
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        # Delete from Cloudinary using public_id (stored in filename field)
+        # If filename is a URL, extract public_id from it
+        public_id = media.filename
+        if public_id.startswith('http'):
+            public_id = extract_public_id_from_url(public_id)
+        
+        # Determine resource type based on media_type
+        resource_type_map = {
+            'image': 'image',
+            'video': 'video',
+            'pdf': 'raw',
+            'audio': 'video'  # Cloudinary treats audio as video
+        }
+        resource_type = resource_type_map.get(media.media_type, 'auto')
+        
+        delete_file_from_cloudinary(public_id, resource_type=resource_type)
 
     db.delete(post)
     db.commit()

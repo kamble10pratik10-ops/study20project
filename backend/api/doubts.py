@@ -9,7 +9,7 @@ from dependencies import get_current_user
 router = APIRouter(prefix="/api/doubts", tags=["doubts"])
 
 
-@router.post("", response_model=DoubtResponse)
+@router.post("/create", response_model=DoubtResponse)
 def create_doubt(
     doubt_data: DoubtCreate,
     current_user: User = Depends(get_current_user),
@@ -29,13 +29,13 @@ def create_doubt(
     return DoubtResponse.model_validate(new_doubt)
 
 
-@router.get("", response_model=list[DoubtDetailResponse])
+@router.post("", response_model=list[DoubtDetailResponse])
 def list_doubts(
     topic: str = None,
     db: Session = Depends(get_db),
 ):
     query = db.query(Doubt).order_by(desc(Doubt.created_at))
-
+    print(topic)
     if topic:
         query = query.filter(Doubt.topic == topic)
 
@@ -57,12 +57,13 @@ def get_doubt(doubt_id: int, db: Session = Depends(get_db)):
     return DoubtDetailResponse.model_validate(doubt)
 
 
-@router.delete("/{doubt_id}")
+@router.post("/delete/{doubt_id}")
 def delete_doubt(
     doubt_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    print(doubt_id)
     doubt = db.query(Doubt).filter(Doubt.id == doubt_id).first()
 
     if not doubt:

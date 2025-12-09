@@ -174,3 +174,34 @@ class PostDetailResponse(PostResponse):
 
 class UserProfileResponse(UserResponse):
     posts: List[PostResponse] = []
+
+
+from pydantic import BaseModel
+from datetime import datetime
+
+
+class ProjectCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    github_url: Optional[str] = None
+    user_id: int
+
+
+class ProjectResponse(BaseModel):
+    id: int
+    title: str
+    description: Optional[str]
+    github_url: Optional[str]
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class ProjectDetailResponse(BaseModel):
+    id: int
+    created_by: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
