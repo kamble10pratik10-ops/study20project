@@ -50,7 +50,7 @@ def get_media_type(content_type: str, filename: str) -> Optional[str]:
     return None
 
 
-@router.post("", response_model=PostResponse)
+@router.post("/create_post", response_model=PostResponse)
 async def create_post(
     title: str = Form(...),
     content: str = Form(...),
@@ -157,12 +157,7 @@ async def add_media_to_post(
     return PostMediaResponse.model_validate(post_media)
 
 
-@router.delete("/media/{media_id}")
-def delete_media(
-    media_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
+
     media = db.query(PostMedia).filter(PostMedia.id == media_id).first()
     if not media:
         raise HTTPException(
@@ -199,11 +194,6 @@ def delete_media(
 
     return {"message": "Media deleted successfully"}
 
-
-@router.get("", response_model=list[PostDetailResponse])
-def list_posts(db: Session = Depends(get_db)):
-    posts = db.query(Post).order_by(desc(Post.created_at)).all()
-    return [PostDetailResponse.model_validate(post) for post in posts]
 
 
 @router.get("/my", response_model=list[PostResponse])

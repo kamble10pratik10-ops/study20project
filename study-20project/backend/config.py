@@ -17,9 +17,9 @@ class Settings(BaseSettings):
     BING_SEARCH_API_KEY: str = ""
     
     # Cloudinary
-    CLOUDINARY_CLOUD_NAME: str = ""
-    CLOUDINARY_API_KEY: str = ""
-    CLOUDINARY_API_SECRET: str = ""
+    CLOUDINARY_CLOUD_NAME: str = "dsy0u40lh"
+    CLOUDINARY_API_KEY: str = "993628589566454"
+    CLOUDINARY_API_SECRET: str = "uqOyjfE3FLHmMLaoj9i9LTGfBq4"
 
     # CORS
     CORS_ORIGINS: list = ["http://localhost:5173", "http://localhost:3000", "http://localhost:5000", "*"]

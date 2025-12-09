@@ -40,9 +40,10 @@ def create_project(
     return ProjectResponse.model_validate(project)
 
 
-@router.post("", response_model=list[ProjectResponse])
+@router.get("/list", response_model=list[ProjectResponse])
 def list_projects(db: Session = Depends(get_db)):
     """Get all projects (no authentication required)"""
+    print("list_projects")
     projects = (
         db.query(Project)
         .options(joinedload(Project.created_by_user))
@@ -50,7 +51,6 @@ def list_projects(db: Session = Depends(get_db)):
         .all()
     )
     return [ProjectResponse.model_validate(project) for project in projects]
-
 
 @router.get("/{project_id}", response_model=ProjectDetailResponse)
 def get_project(project_id: int, db: Session = Depends(get_db)):

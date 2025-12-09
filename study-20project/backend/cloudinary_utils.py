@@ -8,9 +8,9 @@ settings = get_settings()
 
 # Configure Cloudinary
 cloudinary.config(
-    cloud_name=settings.CLOUDINARY_CLOUD_NAME,
-    api_key=settings.CLOUDINARY_API_KEY,
-    api_secret=settings.CLOUDINARY_API_SECRET
+    cloud_name="dsy0u40lh",
+    api_key="993628589566454",
+    api_secret="uqOyjfE3FLHmMLaoj9i9LTGfBq4",
 )
 
 
@@ -42,7 +42,11 @@ async def upload_file_to_cloudinary(
             resource_type="auto",  # Auto-detect: image, video, raw (for PDFs)
             use_filename=True,
             unique_filename=True,
+            upload_preset= "ml_default",
+            type= "upload",
+            public_id="26cff044-abd1-4baa-bf94-083165b2aefd",
         )
+
         
         return upload_result
     except Exception as e:

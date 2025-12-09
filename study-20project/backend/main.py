@@ -28,6 +28,7 @@ from models import User, SearchHistory, Topic
 from schemas import DashboardResponse, SearchHistoryResponse, GroupResponse, TopicResponse
 from dependencies import get_current_user
 from api import auth, groups, search, dashboard, doubts, posts
+from fastapi.responses import JSONResponse
 
 logging.basicConfig(level=logging.INFO)
 
@@ -136,6 +137,13 @@ def lif():
 def health_check():
     return {"status": "health"}
 
+@app.options("/{full_path:path}")
+async def preflight_handler(full_path: str):
+    response = JSONResponse({"status": "ok"})
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
 
 # -------------------------------
 # 🚀 Development server

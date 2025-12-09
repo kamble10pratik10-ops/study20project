@@ -40,17 +40,17 @@ def search_topic(
 
 
 def search_youtube(query: str) -> list:
-    if not settings.YOUTUBE_API_KEY:
-        return [
-            {
-                "id": f"placeholder_{i}",
-                "title": f"Sample {query} Video {i+1}",
-                "description": f"This is a sample video about {query}. Please configure your YouTube API key to fetch real videos.",
-                "thumbnail": "https://via.placeholder.com/320x180?text=YouTube",
-                "url": f"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            }
-            for i in range(3)
-        ]
+    # if not settings.YOUTUBE_API_KEY:
+    #     return [
+    #         {
+    #             "id": f"placeholder_{i}",
+    #             "title": f"Sample {query} Video {i+1}",
+    #             "description": f"This is a sample video about {query}. Please configure your YouTube API key to fetch real videos.",
+    #             "thumbnail": "https://via.placeholder.com/320x180?text=YouTube",
+    #             "url": f"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    #         }
+    #         for i in range(3)
+    #     ]
 
     try:
         url = "https://www.googleapis.com/youtube/v3/search"
@@ -59,7 +59,7 @@ def search_youtube(query: str) -> list:
             "q": query,
             "type": "video",
             "maxResults": 10,
-            "key": settings.YOUTUBE_API_KEY,
+            "key":"AIzaSyABao5b5ctJXr2dFxhEVsFSGBSFJLIhlqU",
         }
 
         response = requests.get(url, params=params, timeout=5)
