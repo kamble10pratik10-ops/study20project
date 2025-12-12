@@ -1,0 +1,211 @@
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Table, Boolean
+from sqlalchemy.orm import relationship
+from datetime import datetime
+from database import Base
+
+# Association table for many-to-many relationship between users and groups
+group_members = Table(
+    "group_members",
+    Base.metadata,
+    Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
+    Column("group_id", Integer, ForeignKey("groups.id"), primary_key=True),
+)
+
+# Association table for many-to-many relationship between users and interests/topics
+user_interests = Table(
+    "user_interests",
+    Base.metadata,
+    Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
+    Column("topic_id", Integer, ForeignKey("topics.id"), primary_key=True),
+)
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    email = Column(String(100), unique=True, index=True, nullable=False)
+    password_hash = Column(String(255), nullable=False)
+    profile_picture = Column(String(255), nullable=True)
+    bio = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    groups = relationship(
+        "Group",
+        secondary=group_members,
+        back_populates="members",
+    )
+    interests = relationship(
+        "Topic",
+        secondary=user_interests,
+        back_populates="interested_users",
+    )
+    doubts = relationship("Doubt", back_populates="created_by_user")
+    search_history = relationship("SearchHistory", back_populates="user")
+    posts = relationship("Post", back_populates="author")
+    projects = relationship("Project", back_populates="created_by_user")
+    messages = relationship("GroupMessage", back_populates="user")
+    sent_connections = relationship(
+        "Connection",
+        foreign_keys="Connection.requester_id",
+        back_populates="requester",
+    )
+    received_connections = relationship(
+        "Connection",
+        foreign_keys="Connection.addressee_id",
+        back_populates="addressee",
+    )
+
+
+class Topic(Base):
+    __tablename__ = "topics"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), unique=True, index=True, nullable=False)
+    description = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    groups = relationship("Group", back_populates="topic")
+    interested_users = relationship(
+        "User",
+        secondary=user_interests,
+        back_populates="interests",
+    )
+
+
+class Group(Base):
+    __tablename__ = "groups"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
+    topic_id = Column(Integer, ForeignKey("topics.id"), nullable=False)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    topic = relationship("Topic", back_populates="groups")
+    members = relationship(
+        "User",
+        secondary=group_members,
+        back_populates="groups",
+    )
+    resources = relationship("GroupResource", back_populates="group")
+    messages = relationship("GroupMessage", back_populates="group")
+
+
+class GroupResource(Base):
+    __tablename__ = "group_resources"
+
+    id = Column(Integer, primary_key=True, index=True)
+    group_id = Column(Integer, ForeignKey("groups.id"), nullable=False)
+    title = Column(String(255), nullable=False)
+    url = Column(String(500), nullable=False)
+    resource_type = Column(String(50), nullable=False)  # 'youtube', 'article', etc.
+    shared_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    group = relationship("Group", back_populates="resources")
+
+
+class Doubt(Base):
+    __tablename__ = "doubts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    topic = Column(String(100), nullable=False)
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    created_by_user = relationship("User", back_populates="doubts")
+
+
+class SearchHistory(Base):
+    __tablename__ = "search_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    topic = Column(String(100), nullable=False)
+    searched_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="search_history")
+
+
+class Post(Base):
+    __tablename__ = "posts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title = Column(String(255), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    author = relationship("User", back_populates="posts")
+    media = relationship("PostMedia", back_populates="post", cascade="all, delete-orphan")
+
+
+class PostMedia(Base):
+    __tablename__ = "post_media"
+
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
+    filename = Column(String(255), nullable=False)
+    original_filename = Column(String(255), nullable=False)
+    file_path = Column(String(500), nullable=False)
+    media_type = Column(String(50), nullable=False)  # 'image', 'audio', 'video', 'pdf'
+    mime_type = Column(String(100), nullable=False)
+    file_size = Column(Integer, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    post = relationship("Post", back_populates="media")
+
+
+class Project(Base):
+    __tablename__ = "projects"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    github_url = Column(String(500), nullable=True)
+    demo_url = Column(String(500), nullable=True)
+    technologies = Column(String(500), nullable=True)  # Comma-separated list
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    created_by_user = relationship("User", back_populates="projects")
+
+class GroupMessage(Base):
+    __tablename__ = "group_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    group_id = Column(Integer, ForeignKey("groups.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    group = relationship("Group", back_populates="messages")
+    user = relationship("User", back_populates="messages")
+
+
+class Connection(Base):
+    __tablename__ = "connections"
+
+    id = Column(Integer, primary_key=True, index=True)
+    requester_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    addressee_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    status = Column(String(20), default="pending", nullable=False)  # pending, accepted, rejected, blocked
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    requester = relationship(
+        "User",
+        foreign_keys=[requester_id],
+        back_populates="sent_connections",
+    )
+    addressee = relationship(
+        "User",
+        foreign_keys=[addressee_id],
+        back_populates="received_connections",
+    )
